@@ -18,7 +18,7 @@
     "url": "https://github.com/bitdog-io/signalr-client-nodejs-forked"
   },
   "dependencies": {
-    "websocket": "^1.0.17"
+    "websocket": "^1.0.23"
   },
   "engines": {
     "node": "*"
