@@ -101,8 +101,8 @@ function negotiateProxies(baseUrl, hubNames, onSuccess, onError, _client) {
                     negotiateObj.Hubs = cleanedHubs;
                     onSuccess(negotiateObj);
                 } else if (res.statusCode == 401 || res.statusCode == 302) {
-                    if (_client.serviceHandlers.onUnauthorized) {
-                        _client.serviceHandlers.onUnauthorized(res);
+                    if (_client.serviceHandlers.unauthorized) {
+                        _client.serviceHandlers.unauthorized(res);
                     } else {
                         console.log('negotiate::Unauthorized (' + res.statusCode + ')');
                     }
@@ -318,8 +318,9 @@ function clientInterface(baseUrl, hubs, reconnectTimeout, doNotStart) {
             onerror: undefined,         // void function(error){}
             messageReceived: undefined, // bool function(message){ return true /* if handled */}
             bindingError: undefined,    // function(error) {}
-            onUnauthorized: undefined,  // function(res) {}
+            unauthorized: undefined,  // function(res) {}
             reconnected: undefined,     // void function(connection){}
+            aborted: undefined,         // void function(){}
             reconnecting: undefined     // function(retry) { return false; } */
         },
 
@@ -520,13 +521,20 @@ function clientInterface(baseUrl, hubs, reconnectTimeout, doNotStart) {
                 });
 
                 res.on('end', function () {
-                    console.log('Connection aborted');
-
+                    if (_client.serviceHandlers.aborted) {
+                        _client.serviceHandlers.aborted.apply(client);
+                    } else {
+                        console.log("Connection aborted");
+                    }
                 });
 
             });
 
             req.on('error', function (e) {
+                if (_client.serviceHandlers.aborted) {
+                    _client.serviceHandlers.aborted.apply(client);
+                }
+
                 handlerErrors('Can\'t abort connection', e, abortUrlOptions);
             });
 
@@ -552,8 +560,8 @@ function clientInterface(baseUrl, hubs, reconnectTimeout, doNotStart) {
                         var startObj = JSON.parse(startData);
                         onSuccess(startObj);
                     } else if (res.statusCode == 401 || res.statusCode == 302) {
-                        if (_client.serviceHandlers.onUnauthorized) {
-                            _client.serviceHandlers.onUnauthorized(res);
+                        if (_client.serviceHandlers.unauthorized) {
+                            _client.serviceHandlers.unauthorized(res);
                         } else {
                             console.log('start::Unauthorized (' + res.statusCode + ')');
                         }
