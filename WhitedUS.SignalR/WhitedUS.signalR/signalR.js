@@ -522,7 +522,7 @@ function clientInterface(baseUrl, hubs, reconnectTimeout, doNotStart) {
 
                 res.on('end', function () {
                     if (_client.serviceHandlers.aborted) {
-                        _client.serviceHandlers.aborted.apply(client);
+                        _client.serviceHandlers.aborted.apply();
                     } else {
                         console.log("Connection aborted");
                     }
@@ -532,7 +532,7 @@ function clientInterface(baseUrl, hubs, reconnectTimeout, doNotStart) {
 
             req.on('error', function (e) {
                 if (_client.serviceHandlers.aborted) {
-                    _client.serviceHandlers.aborted.apply(client);
+                    _client.serviceHandlers.aborted.apply(e);
                 }
 
                 handlerErrors('Can\'t abort connection', e, abortUrlOptions);
